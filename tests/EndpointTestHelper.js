@@ -13,8 +13,6 @@ const EndpointTestHelper = {
       payload: userPayload,
     });
 
-    console.log(responseRegisterUser.result);
-
     const {
       addedUser: { id: owner },
     } = JSON.parse(responseRegisterUser.payload).data;
