@@ -2,8 +2,8 @@
 const EndpointTestHelper = {
   async generateAccessToken(server) {
     const userPayload = {
-      username: "user_dummy",
-      password: "user_dummy123",
+      username: "user_123",
+      password: "user_123",
       fullname: "User Testing",
     };
 

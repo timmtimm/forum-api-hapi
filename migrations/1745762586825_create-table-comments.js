@@ -25,6 +25,11 @@ exports.up = (pgm) => {
       notNull: true,
       default: pgm.func("CURRENT_TIMESTAMP"),
     },
+    is_deleted: {
+      type: "BOOLEAN",
+      notNull: true,
+      default: false,
+    },
   });
 };
 

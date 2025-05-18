@@ -14,6 +14,7 @@ const PasswordHash = require("../Applications/security/PasswordHash");
 const UserRepositoryPostgres = require("./repository/UserRepositoryPostgres");
 const BcryptPasswordHash = require("./security/BcryptPasswordHash");
 const ThreadRepositoryPostgres = require("./repository/ThreadRepositoryPostgres");
+const CommentRepositoryPostgres = require("./repository/CommentRepositoryPostgres");
 
 // use case
 const AddUserUseCase = require("../Applications/use_case/AddUserUseCase");
@@ -28,7 +29,7 @@ const AddThreadUseCase = require("../Applications/use_case/AddThreadUseCase");
 const ThreadRepository = require("../Domains/threads/ThreadRepository");
 const CommentRepository = require("../Domains/comments/CommentRepository");
 const AddCommentUseCase = require("../Applications/use_case/AddCommentUseCase");
-const CommentRepositoryPostgres = require("./repository/CommentRepositoryPostgres");
+const DeleteCommentUseCase = require("../Applications/use_case/DeleteCommentUseCase");
 
 // creating container
 const container = createContainer();
@@ -202,6 +203,23 @@ container.register([
   {
     key: AddCommentUseCase.name,
     Class: AddCommentUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "commentRepository",
+          internal: CommentRepository.name,
+        },
+        {
+          name: "threadRepository",
+          internal: ThreadRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: DeleteCommentUseCase.name,
+    Class: DeleteCommentUseCase,
     parameter: {
       injectType: "destructuring",
       dependencies: [

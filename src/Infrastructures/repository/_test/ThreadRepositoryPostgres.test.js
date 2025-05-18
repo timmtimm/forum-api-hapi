@@ -57,7 +57,7 @@ describe("ThreadRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         threadRepositoryPostgres.findById("thread-123")
-      ).rejects.toThrowError("Thread tidak ditemukan");
+      ).rejects.toThrowError("thread tidak ditemukan");
     });
   });
 });
