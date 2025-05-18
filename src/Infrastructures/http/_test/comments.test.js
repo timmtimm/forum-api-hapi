@@ -175,5 +175,32 @@ describe("/threads/{threadId}/comments endpoint", () => {
         "tidak berhak mengakses resource ini"
       );
     });
+
+    it("should respond with 200 and delete the comment", async () => {
+      const server = await createServer(container);
+      const { accessToken, owner } =
+        await EndpointTestHelper.generateAccessToken(server);
+      const requestPayload = { content: "a comment" };
+      await ThreadsTableTestHelper.addThread({
+        id: "thread-123",
+        owner: owner,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: "comment-123",
+        owner: owner,
+        threadId: "thread-123",
+      });
+      const response = await server.inject({
+        method: "DELETE",
+        url: `/threads/thread-123/comments/comment-123`,
+        payload: requestPayload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual("success");
+    });
   });
 });
