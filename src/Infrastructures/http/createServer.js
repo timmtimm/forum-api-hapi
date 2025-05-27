@@ -9,6 +9,7 @@ const comments = require("../../Interfaces/http/api/comments");
 
 const createServer = async (container) => {
   const server = Hapi.server({
+    debug: { request: ["error"] },
     host: process.env.HOST,
     port: process.env.PORT,
   });

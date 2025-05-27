@@ -63,4 +63,37 @@ describe("/threads endpoint", () => {
       expect(responseJson.data.addedThread).toBeDefined();
     });
   });
+
+  describe("when GET /threads/{threadId}", () => {
+    it("should respond with 404 when thread is not found", async () => {
+      const server = await createServer(container);
+      const response = await server.inject({
+        method: "GET",
+        url: "/threads/thread-123",
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual("fail");
+      expect(responseJson.message).toEqual("thread tidak ditemukan");
+    });
+
+    it("should respond with 200 and the thread data", async () => {
+      const server = await createServer(container);
+      await UserTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({
+        id: "thread-123",
+        title: "Thread Title",
+        body: "Thread Body",
+        owner: "user-123",
+      });
+      const response = await server.inject({
+        method: "GET",
+        url: "/threads/thread-123",
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual("success");
+      expect(responseJson.data.thread).toBeDefined();
+    });
+  });
 });

@@ -1,8 +1,5 @@
 const CommentRepository = require("../../../Domains/comments/CommentRepository");
 const DeleteCommentUseCase = require("../DeleteCommentUseCase");
-const UsersTableTestHelper = require("../../../../tests/UsersTableTestHelper");
-const ThreadsTableTestHelper = require("../../../../tests/ThreadsTableTestHelper");
-const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelper");
 
 describe("DeleteCommentUseCase", () => {
   it("should orchestrating the create thread action correctly", async () => {

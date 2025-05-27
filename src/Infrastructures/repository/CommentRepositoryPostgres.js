@@ -50,6 +50,20 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new NotFoundError("komentar tidak ditemukan");
     }
   }
+
+  async getCommentsByThreadId(threadId) {
+    const query = {
+      text: "SELECT * FROM comments WHERE thread_id = $1",
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      return [];
+    }
+
+    return result.rows;
+  }
 }
 
 module.exports = CommentRepositoryPostgres;

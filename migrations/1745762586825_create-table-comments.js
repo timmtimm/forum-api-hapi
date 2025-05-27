@@ -10,7 +10,7 @@ exports.up = (pgm) => {
       type: "VARCHAR(255)",
       notNull: true,
     },
-    threadId: {
+    thread_id: {
       type: "VARCHAR(50)",
       NotNull: true,
       references: "threads",

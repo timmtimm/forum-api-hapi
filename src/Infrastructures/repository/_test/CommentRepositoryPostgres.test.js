@@ -38,7 +38,7 @@ describe("CommentRepositoryPostgres", () => {
       const comment = await CommentsTableTestHelper.findCommentById(
         "comment-123"
       );
-      expect(comment.threadId).toBe(payload.threadId);
+      expect(comment.thread_id).toBe(payload.threadId);
     });
   });
 
@@ -119,6 +119,42 @@ describe("CommentRepositoryPostgres", () => {
       // Assert
       const comment = await CommentsTableTestHelper.findCommentById(commentId);
       expect(comment.is_deleted).toEqual(true);
+    });
+  });
+
+  describe("getCommentsByThreadId function", () => {
+    it("should return empty array when no comments found for the thread", async () => {
+      // Arrange
+      const threadId = "thread-123";
+      await UsersTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({ id: threadId });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId(
+        threadId
+      );
+
+      // Assert
+      expect(comments).toEqual([]);
+    });
+
+    it("should return comments correctly when comments exist for the thread", async () => {
+      // Arrange
+      const threadId = "thread-123";
+      await UsersTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({ id: threadId });
+      await CommentsTableTestHelper.addComment({ id: "comment-123", threadId });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId(
+        threadId
+      );
+
+      // Assert
+      expect(comments).toHaveLength(1);
+      expect(comments[0].thread_id).toBe(threadId);
     });
   });
 });
