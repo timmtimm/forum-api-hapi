@@ -13,7 +13,7 @@ describe("ThreadRepositoryPostgres", () => {
     await pool.end();
   });
 
-  describe("createThread function", () => {
+  describe("addThread function", () => {
     it("should persist add thread and return added thread correctly", async () => {
       // Arrange
       const payload = {

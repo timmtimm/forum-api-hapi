@@ -53,7 +53,7 @@ class CommentRepositoryPostgres extends CommentRepository {
 
   async getCommentsByThreadId(threadId) {
     const query = {
-      text: "SELECT * FROM comments WHERE thread_id = $1",
+      text: "SELECT * FROM comments WHERE thread_id = $1 ORDER BY date ASC",
       values: [threadId],
     };
 
@@ -63,6 +63,30 @@ class CommentRepositoryPostgres extends CommentRepository {
     }
 
     return result.rows;
+  }
+
+  async verifyCommentExists(id) {
+    const query = {
+      text: "SELECT id FROM comments WHERE id = $1",
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError("komentar tidak ditemukan");
+    }
+  }
+
+  async verifyCommentAndThreadExists(commentId, threadId) {
+    const query = {
+      text: "SELECT id FROM comments WHERE id = $1 AND thread_id = $2",
+      values: [commentId, threadId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError("komentar tidak ditemukan pada thread ini");
+    }
   }
 }
 

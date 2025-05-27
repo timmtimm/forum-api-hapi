@@ -12,5 +12,8 @@ describe("CommentRepository interface", () => {
     await expect(commentRepository.softDeleteComment({})).rejects.toThrowError(
       "COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED"
     );
+    await expect(
+      commentRepository.verifyCommentExists({})
+    ).rejects.toThrowError("COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED");
   });
 });
