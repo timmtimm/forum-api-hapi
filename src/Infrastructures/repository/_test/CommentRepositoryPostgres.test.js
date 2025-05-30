@@ -157,6 +157,70 @@ describe("CommentRepositoryPostgres", () => {
       expect(comments[0].thread_id).toBe(threadId);
     });
   });
+
+  it("verifyCommentAndThreadExists function should throw NotFoundError when comment is not found in the thread", async () => {
+    // Arrange
+    const commentId = "comment-123";
+    const threadId = "thread-123";
+    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+    await UsersTableTestHelper.addUser({ id: "user-123" });
+    await ThreadsTableTestHelper.addThread({ id: threadId });
+    await CommentsTableTestHelper.addComment({ id: commentId, threadId });
+
+    // Action & Assert
+    await expect(
+      commentRepositoryPostgres.verifyCommentAndThreadExists(
+        commentId,
+        "other-thread"
+      )
+    ).rejects.toThrow("komentar tidak ditemukan pada thread ini");
+  });
+
+  it("verifyCommentAndThreadExists function should return comment when it exists in the thread", async () => {
+    // Arrange
+    const commentId = "comment-123";
+    const threadId = "thread-123";
+    await UsersTableTestHelper.addUser({ id: "user-123" });
+    await ThreadsTableTestHelper.addThread({ id: threadId });
+    await CommentsTableTestHelper.addComment({ id: commentId, threadId });
+    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+    // Action & Assert
+    await expect(
+      commentRepositoryPostgres.verifyCommentAndThreadExists(
+        commentId,
+        threadId
+      )
+    ).resolves.not.toThrow();
+  });
+
+  it("verifyCommentExists function should throw NotFoundError when comment is not found", async () => {
+    // Arrange
+    const commentId = "comment-123";
+    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+    // Action & Assert
+    await expect(
+      commentRepositoryPostgres.verifyCommentExists(commentId)
+    ).rejects.toThrow("komentar tidak ditemukan");
+  });
+
+  it("verifyCommentExists function should not throw error when comment exists", async () => {
+    // Arrange
+    const commentId = "comment-123";
+    await UsersTableTestHelper.addUser({ id: "user-123" });
+    await ThreadsTableTestHelper.addThread({ id: "thread-123" });
+    await CommentsTableTestHelper.addComment({
+      id: commentId,
+      threadId: "thread-123",
+    });
+    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+    // Action & Assert
+    await expect(
+      commentRepositoryPostgres.verifyCommentExists(commentId)
+    ).resolves.not.toThrow();
+  });
 });
 
 module.exports = CommentRepositoryPostgres;
