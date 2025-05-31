@@ -1,6 +1,7 @@
 const ReplyRepository = require("../../Domains/replies/ReplyRepository");
 const NotFoundError = require("../../Commons/exceptions/NotFoundError");
 const AuthorizationError = require("../../Commons/exceptions/AuthorizationError");
+const CreatedReply = require("../../Domains/replies/entities/CreatedReply");
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
@@ -17,7 +18,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     };
 
     const result = await this._pool.query(query);
-    return result.rows[0];
+    return new CreatedReply({ ...result.rows[0] });
   }
 
   async verifyReplyAndOwner(id, owner) {

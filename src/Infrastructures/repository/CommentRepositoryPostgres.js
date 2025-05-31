@@ -1,6 +1,7 @@
 const CommentRepository = require("../../Domains/comments/CommentRepository");
 const NotFoundError = require("../../Commons/exceptions/NotFoundError");
 const AuthorizationError = require("../../Commons/exceptions/AuthorizationError");
+const CreatedComment = require("../../Domains/comments/entities/CreatedComment");
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -17,7 +18,7 @@ class CommentRepositoryPostgres extends CommentRepository {
     };
 
     const result = await this._pool.query(query);
-    return result.rows[0];
+    return new CreatedComment({ ...result.rows[0] });
   }
 
   async verifyCommentAndOwner(id, owner) {

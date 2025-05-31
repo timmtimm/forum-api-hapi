@@ -3,6 +3,10 @@ const UsersTableTestHelper = require("../../../../tests/UsersTableTestHelper");
 const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelper");
 const pool = require("../../database/postgres/pool");
 const CommentRepositoryPostgres = require("../CommentRepositoryPostgres");
+const AuthorizationError = require("../../../Commons/exceptions/AuthorizationError");
+const NotFoundError = require("../../../Commons/exceptions/NotFoundError");
+const CreateComment = require("../../../Domains/comments/entities/CreateComment");
+const CreatedComment = require("../../../Domains/comments/entities/CreatedComment");
 
 describe("CommentRepositoryPostgres", () => {
   afterEach(async () => {
@@ -18,15 +22,18 @@ describe("CommentRepositoryPostgres", () => {
   describe("addComment function", () => {
     it("should persist add comment and return added comment correctly", async () => {
       // Arrange
-      const payload = {
+      const payload = new CreateComment({
         content: "a content",
         owner: "user-123",
         threadId: "thread-123",
-      };
-      const expectComment = {
+      });
+      const expectComment = new CreatedComment({
         id: "comment-123",
         content: payload.content,
         owner: payload.owner,
+      });
+      const expectCommentByFindId = {
+        ...expectComment,
         thread_id: payload.threadId,
         is_deleted: false,
       };
@@ -39,14 +46,16 @@ describe("CommentRepositoryPostgres", () => {
       );
 
       // Action
-      await commentRepositoryPostgres.addComment(payload);
+      const useCaseResult = await commentRepositoryPostgres.addComment(payload);
 
       // Assert
-      const comment = await CommentsTableTestHelper.findCommentById(
+      expect(useCaseResult).toStrictEqual(expectComment);
+
+      const commentByFindId = await CommentsTableTestHelper.findCommentById(
         "comment-123"
       );
-      expectComment.date = comment.date;
-      expect(comment).toStrictEqual(expectComment);
+      expectCommentByFindId.date = commentByFindId.date;
+      expect(commentByFindId).toStrictEqual(expectCommentByFindId);
     });
   });
 
@@ -60,7 +69,7 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.verifyCommentAndOwner(commentId, owner)
-      ).rejects.toThrow("komentar tidak ditemukan");
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should throw AuthorizationError when owner is not the same as the comment owner", async () => {
@@ -75,7 +84,7 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.verifyCommentAndOwner(commentId, "other-user")
-      ).rejects.toThrow("tidak berhak mengakses resource ini");
+      ).rejects.toThrow(AuthorizationError);
     });
 
     it("should return comment correctly when the owner is the same as the comment owner", async () => {
@@ -90,7 +99,10 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.verifyCommentAndOwner(commentId, owner)
-      ).resolves.not.toThrow();
+      ).resolves.not.toThrow(NotFoundError);
+      await expect(
+        commentRepositoryPostgres.verifyCommentAndOwner(commentId, owner)
+      ).resolves.not.toThrow(AuthorizationError);
     });
   });
 
@@ -103,7 +115,7 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.softDeleteComment(commentId)
-      ).rejects.toThrow("komentar tidak ditemukan");
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should soft delete comment correctly", async () => {
@@ -140,7 +152,7 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.verifyCommentExists(commentId)
-      ).rejects.toThrow("komentar tidak ditemukan");
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should not throw error when comment exists", async () => {
@@ -157,7 +169,7 @@ describe("CommentRepositoryPostgres", () => {
       // Action & Assert
       await expect(
         commentRepositoryPostgres.verifyCommentExists(commentId)
-      ).resolves.not.toThrow();
+      ).resolves.not.toThrow(NotFoundError);
     });
   });
 
@@ -175,7 +187,7 @@ describe("CommentRepositoryPostgres", () => {
       );
 
       // Assert
-      expect(comments).toEqual([]);
+      expect(comments).toStrictEqual([]);
     });
 
     it("should return comments correctly when comments exist for the thread", async () => {
@@ -221,7 +233,7 @@ describe("CommentRepositoryPostgres", () => {
           commentId,
           "other-thread"
         )
-      ).rejects.toThrow("komentar tidak ditemukan pada thread ini");
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("function should return comment when it exists in the thread", async () => {
@@ -239,7 +251,7 @@ describe("CommentRepositoryPostgres", () => {
           commentId,
           threadId
         )
-      ).resolves.not.toThrow();
+      ).resolves.not.toThrow(NotFoundError);
     });
   });
 });

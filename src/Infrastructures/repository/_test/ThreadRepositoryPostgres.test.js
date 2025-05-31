@@ -1,5 +1,7 @@
 const ThreadsTableTestHelper = require("../../../../tests/ThreadsTableTestHelper");
 const UsersTableTestHelper = require("../../../../tests/UsersTableTestHelper");
+const CreateThread = require("../../../Domains/threads/entities/CreateThread");
+const CreatedThread = require("../../../Domains/threads/entities/CreatedThread");
 const pool = require("../../database/postgres/pool");
 const ThreadRepositoryPostgres = require("../ThreadRepositoryPostgres");
 
@@ -16,32 +18,41 @@ describe("ThreadRepositoryPostgres", () => {
   describe("addThread function", () => {
     it("should persist add thread and return added thread correctly", async () => {
       // Arrange
-      const payload = {
+      const payload = new CreateThread({
         title: "a title",
         body: "a body",
         owner: "user-123",
-      };
+      });
 
-      const expectThread = {
+      const expectThread = new CreatedThread({
         id: "thread-123",
         title: payload.title,
+        owner: payload.owner,
+      });
+
+      const expectThreadByFindId = {
+        id: "thread-123",
         body: payload.body,
+        title: payload.title,
         owner: payload.owner,
       };
+
       await UsersTableTestHelper.addUser({ id: payload.owner });
       const fakeIdGenerator = () => "123"; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
         pool,
         fakeIdGenerator
       );
-      await threadRepositoryPostgres.addThread(payload);
 
       // Action
-      const thread = await threadRepositoryPostgres.findById("thread-123");
-      expectThread.date = thread.date;
+      const thread = await threadRepositoryPostgres.addThread(payload);
 
       // Assert
-      expect(thread).toEqual(expectThread);
+      expect(thread).toStrictEqual(expectThread);
+
+      const threadById = await threadRepositoryPostgres.findById("thread-123");
+      expectThreadByFindId.date = threadById.date;
+      expect(threadById).toStrictEqual(expectThreadByFindId);
     });
   });
 
@@ -62,11 +73,11 @@ describe("ThreadRepositoryPostgres", () => {
 
     it("should return thread by id", async () => {
       // Arrange
-      const payload = {
+      const payload = new CreateThread({
         title: "a title",
         body: "a body",
         owner: "user-123",
-      };
+      });
 
       const expectThread = {
         id: "thread-123",
@@ -88,7 +99,7 @@ describe("ThreadRepositoryPostgres", () => {
       expectThread.date = thread.date;
 
       // Assert
-      expect(thread).toEqual(expectThread);
+      expect(thread).toStrictEqual(expectThread);
     });
   });
 });
