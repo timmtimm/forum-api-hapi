@@ -23,6 +23,13 @@ describe("CommentRepositoryPostgres", () => {
         owner: "user-123",
         threadId: "thread-123",
       };
+      const expectComment = {
+        id: "comment-123",
+        content: payload.content,
+        owner: payload.owner,
+        thread_id: payload.threadId,
+        is_deleted: false,
+      };
       await UsersTableTestHelper.addUser({ id: payload.owner });
       await ThreadsTableTestHelper.addThread({ id: payload.threadId });
       const fakeIdGenerator = () => "123"; // stub!
@@ -38,7 +45,8 @@ describe("CommentRepositoryPostgres", () => {
       const comment = await CommentsTableTestHelper.findCommentById(
         "comment-123"
       );
-      expect(comment.thread_id).toBe(payload.threadId);
+      expectComment.date = comment.date;
+      expect(comment).toStrictEqual(expectComment);
     });
   });
 
@@ -79,17 +87,10 @@ describe("CommentRepositoryPostgres", () => {
       await CommentsTableTestHelper.addComment({ id: commentId, owner });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-      // Action
-      const result = await commentRepositoryPostgres.verifyCommentAndOwner(
-        commentId,
-        owner
-      );
-
-      // Assert
-      expect(result).toEqual({
-        id: commentId,
-        owner,
-      });
+      // Action & Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentAndOwner(commentId, owner)
+      ).resolves.not.toThrow();
     });
   });
 
@@ -108,6 +109,13 @@ describe("CommentRepositoryPostgres", () => {
     it("should soft delete comment correctly", async () => {
       // Arrange
       const commentId = "comment-123";
+      const expectComment = {
+        id: commentId,
+        content: "a comment",
+        owner: "user-123",
+        thread_id: "thread-123",
+        is_deleted: true,
+      };
       await UsersTableTestHelper.addUser({ id: "user-123" });
       await ThreadsTableTestHelper.addThread({ id: "thread-123" });
       await CommentsTableTestHelper.addComment({ id: commentId });
@@ -118,7 +126,38 @@ describe("CommentRepositoryPostgres", () => {
 
       // Assert
       const comment = await CommentsTableTestHelper.findCommentById(commentId);
-      expect(comment.is_deleted).toEqual(true);
+      expectComment.date = comment.date;
+      expect(comment).toStrictEqual(expectComment);
+    });
+  });
+
+  describe("verifyCommentExists function", () => {
+    it("should throw NotFoundError when comment is not found", async () => {
+      // Arrange
+      const commentId = "comment-123";
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentExists(commentId)
+      ).rejects.toThrow("komentar tidak ditemukan");
+    });
+
+    it("should not throw error when comment exists", async () => {
+      // Arrange
+      const commentId = "comment-123";
+      await UsersTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({ id: "thread-123" });
+      await CommentsTableTestHelper.addComment({
+        id: commentId,
+        threadId: "thread-123",
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentExists(commentId)
+      ).resolves.not.toThrow();
     });
   });
 
@@ -142,6 +181,13 @@ describe("CommentRepositoryPostgres", () => {
     it("should return comments correctly when comments exist for the thread", async () => {
       // Arrange
       const threadId = "thread-123";
+      const expectComment = {
+        id: "comment-123",
+        content: "a comment",
+        owner: "user-123",
+        thread_id: threadId,
+        is_deleted: false,
+      };
       await UsersTableTestHelper.addUser({ id: "user-123" });
       await ThreadsTableTestHelper.addThread({ id: threadId });
       await CommentsTableTestHelper.addComment({ id: "comment-123", threadId });
@@ -153,73 +199,48 @@ describe("CommentRepositoryPostgres", () => {
       );
 
       // Assert
+      expectComment.date = comments[0].date;
       expect(comments).toHaveLength(1);
-      expect(comments[0].thread_id).toBe(threadId);
+      expect(comments[0]).toStrictEqual(expectComment);
     });
   });
 
-  it("verifyCommentAndThreadExists function should throw NotFoundError when comment is not found in the thread", async () => {
-    // Arrange
-    const commentId = "comment-123";
-    const threadId = "thread-123";
-    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-    await UsersTableTestHelper.addUser({ id: "user-123" });
-    await ThreadsTableTestHelper.addThread({ id: threadId });
-    await CommentsTableTestHelper.addComment({ id: commentId, threadId });
+  describe("verifyCommentAndThreadExists function", () => {
+    it("should throw NotFoundError when comment is not found in the thread", async () => {
+      // Arrange
+      const commentId = "comment-123";
+      const threadId = "thread-123";
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      await UsersTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({ id: threadId });
+      await CommentsTableTestHelper.addComment({ id: commentId, threadId });
 
-    // Action & Assert
-    await expect(
-      commentRepositoryPostgres.verifyCommentAndThreadExists(
-        commentId,
-        "other-thread"
-      )
-    ).rejects.toThrow("komentar tidak ditemukan pada thread ini");
-  });
-
-  it("verifyCommentAndThreadExists function should return comment when it exists in the thread", async () => {
-    // Arrange
-    const commentId = "comment-123";
-    const threadId = "thread-123";
-    await UsersTableTestHelper.addUser({ id: "user-123" });
-    await ThreadsTableTestHelper.addThread({ id: threadId });
-    await CommentsTableTestHelper.addComment({ id: commentId, threadId });
-    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-    // Action & Assert
-    await expect(
-      commentRepositoryPostgres.verifyCommentAndThreadExists(
-        commentId,
-        threadId
-      )
-    ).resolves.not.toThrow();
-  });
-
-  it("verifyCommentExists function should throw NotFoundError when comment is not found", async () => {
-    // Arrange
-    const commentId = "comment-123";
-    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-    // Action & Assert
-    await expect(
-      commentRepositoryPostgres.verifyCommentExists(commentId)
-    ).rejects.toThrow("komentar tidak ditemukan");
-  });
-
-  it("verifyCommentExists function should not throw error when comment exists", async () => {
-    // Arrange
-    const commentId = "comment-123";
-    await UsersTableTestHelper.addUser({ id: "user-123" });
-    await ThreadsTableTestHelper.addThread({ id: "thread-123" });
-    await CommentsTableTestHelper.addComment({
-      id: commentId,
-      threadId: "thread-123",
+      // Action & Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentAndThreadExists(
+          commentId,
+          "other-thread"
+        )
+      ).rejects.toThrow("komentar tidak ditemukan pada thread ini");
     });
-    const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-    // Action & Assert
-    await expect(
-      commentRepositoryPostgres.verifyCommentExists(commentId)
-    ).resolves.not.toThrow();
+    it("function should return comment when it exists in the thread", async () => {
+      // Arrange
+      const commentId = "comment-123";
+      const threadId = "thread-123";
+      await UsersTableTestHelper.addUser({ id: "user-123" });
+      await ThreadsTableTestHelper.addThread({ id: threadId });
+      await CommentsTableTestHelper.addComment({ id: commentId, threadId });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentAndThreadExists(
+          commentId,
+          threadId
+        )
+      ).resolves.not.toThrow();
+    });
   });
 });
 

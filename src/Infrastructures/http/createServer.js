@@ -10,7 +10,7 @@ const replies = require("../../Interfaces/http/api/replies");
 
 const createServer = async (container) => {
   const server = Hapi.server({
-    debug: { request: ["error"] },
+    // debug: { request: ["error"] },
     host: process.env.HOST,
     port: process.env.PORT,
   });

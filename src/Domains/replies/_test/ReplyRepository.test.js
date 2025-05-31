@@ -9,8 +9,17 @@ describe("ReplyRepository interface", () => {
     await expect(replyRepository.addReply({})).rejects.toThrowError(
       "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
     );
+    await expect(
+      replyRepository.verifyReplyAndOwner({}, {}, {})
+    ).rejects.toThrowError("REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED");
     await expect(replyRepository.softDeleteReply({})).rejects.toThrowError(
       "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
     );
+    await expect(
+      replyRepository.getRepliesByCommentId({})
+    ).rejects.toThrowError("REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED");
+    await expect(
+      replyRepository.verifyCommentReplyAndOwner({}, {}, {})
+    ).rejects.toThrowError("REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED");
   });
 });

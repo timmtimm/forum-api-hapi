@@ -32,6 +32,16 @@ describe("DeleteCommentUseCase", () => {
     const deletedComment = await deleteCommentUseCase.execute(useCasePayload);
 
     // Assert
+    expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(
+      useCasePayload.threadId
+    );
+    expect(mockCommentRepository.verifyCommentAndOwner).toBeCalledWith(
+      useCasePayload.commentId,
+      useCasePayload.owner
+    );
+    expect(mockCommentRepository.softDeleteComment).toBeCalledWith(
+      useCasePayload.commentId
+    );
     expect(deletedComment).toStrictEqual();
   });
 });

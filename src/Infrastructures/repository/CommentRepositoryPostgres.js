@@ -34,8 +34,6 @@ class CommentRepositoryPostgres extends CommentRepository {
     if (result.rows[0].owner !== owner) {
       throw new AuthorizationError("tidak berhak mengakses resource ini");
     }
-
-    return result.rows[0];
   }
 
   async softDeleteComment(id) {

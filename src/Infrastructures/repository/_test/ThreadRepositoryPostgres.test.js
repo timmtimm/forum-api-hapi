@@ -59,5 +59,36 @@ describe("ThreadRepositoryPostgres", () => {
         threadRepositoryPostgres.findById("thread-123")
       ).rejects.toThrowError("thread tidak ditemukan");
     });
+
+    it("should return thread by id", async () => {
+      // Arrange
+      const payload = {
+        title: "a title",
+        body: "a body",
+        owner: "user-123",
+      };
+
+      const expectThread = {
+        id: "thread-123",
+        title: payload.title,
+        body: payload.body,
+        owner: payload.owner,
+      };
+
+      await UsersTableTestHelper.addUser({ id: payload.owner });
+      const fakeIdGenerator = () => "123"; // stub!
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        pool,
+        fakeIdGenerator
+      );
+      await threadRepositoryPostgres.addThread(payload);
+
+      // Action
+      const thread = await threadRepositoryPostgres.findById("thread-123");
+      expectThread.date = thread.date;
+
+      // Assert
+      expect(thread).toEqual(expectThread);
+    });
   });
 });
