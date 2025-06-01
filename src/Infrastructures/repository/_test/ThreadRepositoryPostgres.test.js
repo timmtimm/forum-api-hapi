@@ -50,11 +50,11 @@ describe("ThreadRepositoryPostgres", () => {
       // Assert
       expect(thread).toStrictEqual(expectThread);
 
-      const threads = await ThreadsTableTestHelper.findThreadsById(
+      const threadById = await ThreadsTableTestHelper.findThreadsById(
         expectThread.id
       );
-      expectThreadByFindId.date = threadById.date;
-      expect(threadById).toStrictEqual(expectThreadByFindId);
+      expectThreadByFindId.date = threadById[0].date;
+      expect(threadById[0]).toStrictEqual(expectThreadByFindId);
     });
   });
 
