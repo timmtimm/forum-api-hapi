@@ -86,6 +86,8 @@ describe("ThreadRepositoryPostgres", () => {
         owner: payload.owner,
       };
 
+      const beforeExecureDate = new Date();
+
       await UsersTableTestHelper.addUser({ id: payload.owner });
       const fakeIdGenerator = () => "123"; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
@@ -99,6 +101,10 @@ describe("ThreadRepositoryPostgres", () => {
       expectThread.date = thread.date;
 
       // Assert
+      const afterExecureDate = new Date();
+      const assertDate =
+        thread.date >= beforeExecureDate && thread.date <= afterExecureDate;
+      expect(assertDate).toBeTruthy();
       expect(thread).toStrictEqual(expectThread);
     });
   });

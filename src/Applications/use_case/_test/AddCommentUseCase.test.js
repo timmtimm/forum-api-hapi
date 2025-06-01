@@ -1,6 +1,8 @@
 const CommentRepository = require("../../../Domains/comments/CommentRepository");
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
 const AddCommentUseCase = require("../AddCommentUseCase");
+const CreateComment = require("../../../Domains/comments/entities/CreateComment");
+const CreatedComment = require("../../../Domains/comments/entities/CreatedComment");
 
 describe("AddCommentUseCase", () => {
   it("should orchestrating the create comment action correctly", async () => {
@@ -11,11 +13,11 @@ describe("AddCommentUseCase", () => {
       owner: "user-123",
     };
 
-    const expectCreatedComment = {
+    const expectCreatedComment = new CreatedComment({
       id: "comment-123",
       content: useCasePayload.content,
       owner: useCasePayload.owner,
-    };
+    });
 
     /** creating dependency of use case */
     const mockCommentRepository = new CommentRepository();
@@ -26,11 +28,13 @@ describe("AddCommentUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.addComment = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        id: "comment-123",
-        content: useCasePayload.content,
-        owner: useCasePayload.owner,
-      })
+      Promise.resolve(
+        new CreatedComment({
+          id: "comment-123",
+          content: useCasePayload.content,
+          owner: useCasePayload.owner,
+        })
+      )
     );
 
     /** creating use case instance */
@@ -46,11 +50,13 @@ describe("AddCommentUseCase", () => {
     expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(
       useCasePayload.threadId
     );
-    expect(mockCommentRepository.addComment).toBeCalledWith({
-      content: useCasePayload.content,
-      owner: useCasePayload.owner,
-      threadId: useCasePayload.threadId,
-    });
+    expect(mockCommentRepository.addComment).toBeCalledWith(
+      new CreateComment({
+        content: useCasePayload.content,
+        owner: useCasePayload.owner,
+        threadId: useCasePayload.threadId,
+      })
+    );
     expect(createdComment).toStrictEqual(expectCreatedComment);
   });
 });
