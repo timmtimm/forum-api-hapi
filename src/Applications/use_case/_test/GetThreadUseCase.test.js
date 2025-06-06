@@ -53,8 +53,10 @@ describe("GetThreadUseCase", () => {
           {
             id: "comment-123",
             content: "sebuah comment",
+            thread_id: "thread-123",
             date: "2023-01-01T00:00:00.000Z",
             owner: "user-123",
+            is_deleted: false,
           },
         ])
       );
@@ -132,6 +134,7 @@ describe("GetThreadUseCase", () => {
           {
             id: "comment-123",
             content: "sebuah comment",
+            thread_id: "thread-123",
             date: "2023-01-01T00:00:00.000Z",
             owner: "user-123",
             is_deleted: true,
@@ -221,8 +224,10 @@ describe("GetThreadUseCase", () => {
           {
             id: "comment-123",
             content: "sebuah comment",
+            thread_id: "thread-123",
             date: "2023-01-01T00:00:00.000Z",
             owner: "user-123",
+            is_deleted: false,
           },
         ])
       );
@@ -319,8 +324,10 @@ describe("GetThreadUseCase", () => {
           {
             id: "comment-123",
             content: "sebuah comment",
+            thread_id: "thread-123",
             date: "2023-01-01T00:00:00.000Z",
             owner: "user-123",
+            is_deleted: false,
           },
         ])
       );

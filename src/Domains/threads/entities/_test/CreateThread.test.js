@@ -37,10 +37,11 @@ describe("a CreateThread entities", () => {
     };
 
     // Action
-    const { title, owner } = new CreateThread(payload);
+    const { title, owner, body } = new CreateThread(payload);
 
     // Assert
     expect(title).toEqual(payload.title);
     expect(owner).toEqual(payload.owner);
+    expect(body).toEqual(payload.body);
   });
 });

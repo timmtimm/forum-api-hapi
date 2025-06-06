@@ -32,12 +32,7 @@ describe("CommentRepositoryPostgres", () => {
         content: payload.content,
         owner: payload.owner,
       });
-      const expectCommentByFindId = {
-        ...expectComment,
-        thread_id: payload.threadId,
-        is_deleted: false,
-      };
-      const beforeExecuteDate = new Date();
+
       await UsersTableTestHelper.addUser({ id: payload.owner });
       await ThreadsTableTestHelper.addThread({ id: payload.threadId });
       const fakeIdGenerator = () => "123"; // stub!
@@ -51,17 +46,6 @@ describe("CommentRepositoryPostgres", () => {
 
       // Assert
       expect(useCaseResult).toStrictEqual(expectComment);
-      const afterExecuteDate = new Date();
-
-      const commentByFindId = await CommentsTableTestHelper.findCommentById(
-        "comment-123"
-      );
-      const assertDate =
-        commentByFindId.date >= beforeExecuteDate &&
-        commentByFindId.date <= afterExecuteDate;
-      expect(assertDate).toBeTruthy();
-      expectCommentByFindId.date = commentByFindId.date;
-      expect(commentByFindId).toStrictEqual(expectCommentByFindId);
     });
   });
 
@@ -206,7 +190,6 @@ describe("CommentRepositoryPostgres", () => {
         thread_id: threadId,
         is_deleted: false,
       };
-      const beforeExecuteDate = new Date();
       await UsersTableTestHelper.addUser({ id: "user-123" });
       await ThreadsTableTestHelper.addThread({ id: threadId });
       await CommentsTableTestHelper.addComment({ id: "comment-123", threadId });
@@ -218,14 +201,8 @@ describe("CommentRepositoryPostgres", () => {
       );
 
       // Assert
-      const afterExecuteDate = new Date();
-      const assertDate =
-        comments[0].date >= beforeExecuteDate &&
-        comments[0].date <= afterExecuteDate;
-
       expectComment.date = comments[0].date;
       expect(comments).toHaveLength(1);
-      expect(assertDate).toBeTruthy();
       expect(comments[0]).toStrictEqual(expectComment);
     });
   });

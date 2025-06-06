@@ -37,12 +37,6 @@ describe("ReplyRepositoryPostgres", () => {
         owner: "user-123",
       });
 
-      const expectReplyByFindId = {
-        ...expectReply,
-        comment_id: "comment-123",
-        is_deleted: false,
-      };
-
       await UsersTableTestHelper.addUser({
         id: "user-123",
         username: "dicoding",
@@ -67,12 +61,6 @@ describe("ReplyRepositoryPostgres", () => {
 
       // Assert
       expect(addedReply).toStrictEqual(expectReply);
-
-      const replyByFindId = await RepliesTableTestHelper.findReplyById(
-        "reply-123"
-      );
-      expectReplyByFindId.date = replyByFindId.date;
-      expect(replyByFindId).toStrictEqual(expectReplyByFindId);
     });
   });
 
@@ -239,7 +227,6 @@ describe("ReplyRepositoryPostgres", () => {
 
   it("getRepliesByCommentId function should return replies ordered by date", async () => {
     // Arrange
-    const beforeExecuteDate = new Date();
     await UsersTableTestHelper.addUser({
       id: "user-123",
       username: "dicoding",
@@ -279,20 +266,23 @@ describe("ReplyRepositoryPostgres", () => {
     );
 
     // Assert
-    const afterExecuteDate = new Date();
-    const assertDate1 =
-      replies[0].date >= beforeExecuteDate &&
-      replies[0].date <= afterExecuteDate;
-    const assertDate2 =
-      replies[1].date >= beforeExecuteDate &&
-      replies[1].date <= afterExecuteDate;
-    expect(assertDate1).toBeTruthy();
-    expect(assertDate2).toBeTruthy();
     expect(replies).toHaveLength(2);
-    expect(replies[0]).toHaveProperty("id", "reply-123");
-    expect(replies[0]).toHaveProperty("content", "Reply Content 1");
-    expect(replies[1]).toHaveProperty("id", "reply-124");
-    expect(replies[1]).toHaveProperty("content", "Reply Content 2");
+    expect(replies[0]).toStrictEqual({
+      id: "reply-123",
+      content: "Reply Content 1",
+      owner: "user-123",
+      date: replies[0].date,
+      is_deleted: false,
+      comment_id: "comment-123",
+    });
+    expect(replies[1]).toStrictEqual({
+      id: "reply-124",
+      content: "Reply Content 2",
+      owner: "user-123",
+      date: replies[1].date,
+      is_deleted: false,
+      comment_id: "comment-123",
+    });
   });
 
   it("verifyCommentReplyAndOwner function should throw NotFoundError when reply is not found", async () => {

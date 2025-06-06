@@ -55,6 +55,9 @@ describe("DeleteReplyCase", () => {
       useCasePayload.replyId,
       useCasePayload.owner
     );
+    expect(mockReplyRepository.softDeleteReply).toBeCalledWith(
+      useCasePayload.replyId
+    );
     expect(deletedReply).toStrictEqual();
   });
 });
