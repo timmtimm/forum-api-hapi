@@ -1,4 +1,5 @@
 const CommentRepository = require("../../../Domains/comments/CommentRepository");
+const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
 const DeleteCommentUseCase = require("../DeleteCommentUseCase");
 
 describe("DeleteCommentUseCase", () => {
@@ -11,7 +12,7 @@ describe("DeleteCommentUseCase", () => {
     };
 
     const mockCommentRepository = new CommentRepository();
-    const mockThreadRepository = new CommentRepository();
+    const mockThreadRepository = new ThreadRepository();
 
     mockThreadRepository.verifyThreadExists = jest
       .fn()
