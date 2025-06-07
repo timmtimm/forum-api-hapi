@@ -117,10 +117,14 @@ describe("CommentRepositoryPostgres", () => {
         owner: "user-123",
         thread_id: "thread-123",
         is_deleted: true,
+        date: new Date("2023-01-01T00:00:00.000Z"),
       };
       await UsersTableTestHelper.addUser({ id: "user-123" });
       await ThreadsTableTestHelper.addThread({ id: "thread-123" });
-      await CommentsTableTestHelper.addComment({ id: commentId });
+      await CommentsTableTestHelper.addComment({
+        id: commentId,
+        date: expectComment.date,
+      });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
       // Action
@@ -128,7 +132,6 @@ describe("CommentRepositoryPostgres", () => {
 
       // Assert
       const comment = await CommentsTableTestHelper.findCommentById(commentId);
-      expectComment.date = comment.date;
       expect(comment).toStrictEqual(expectComment);
     });
   });
@@ -189,10 +192,15 @@ describe("CommentRepositoryPostgres", () => {
         owner: "user-123",
         thread_id: threadId,
         is_deleted: false,
+        date: new Date("2023-01-01T00:00:00.000Z"),
       };
       await UsersTableTestHelper.addUser({ id: "user-123" });
       await ThreadsTableTestHelper.addThread({ id: threadId });
-      await CommentsTableTestHelper.addComment({ id: "comment-123", threadId });
+      await CommentsTableTestHelper.addComment({
+        id: "comment-123",
+        threadId,
+        date: expectComment.date,
+      });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
       // Action
@@ -201,7 +209,6 @@ describe("CommentRepositoryPostgres", () => {
       );
 
       // Assert
-      expectComment.date = comments[0].date;
       expect(comments).toHaveLength(1);
       expect(comments[0]).toStrictEqual(expectComment);
     });

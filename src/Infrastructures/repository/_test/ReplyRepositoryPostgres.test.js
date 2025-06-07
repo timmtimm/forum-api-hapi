@@ -252,7 +252,7 @@ describe("ReplyRepositoryPostgres", () => {
       content: "Reply Content 2",
       commentId: "comment-123",
       owner: "user-123",
-      date: new Date("2023-01-02T00:00:00.000Z"),
+      date: new Date("2023-01-01T00:00:00.000Z"),
     });
 
     const replyRepositoryPostgres = new ReplyRepositoryPostgres(
@@ -271,7 +271,7 @@ describe("ReplyRepositoryPostgres", () => {
       id: "reply-123",
       content: "Reply Content 1",
       owner: "user-123",
-      date: replies[0].date,
+      date: new Date("2023-01-01T00:00:00.000Z"),
       is_deleted: false,
       comment_id: "comment-123",
     });
@@ -279,7 +279,7 @@ describe("ReplyRepositoryPostgres", () => {
       id: "reply-124",
       content: "Reply Content 2",
       owner: "user-123",
-      date: replies[1].date,
+      date: new Date("2023-01-01T00:00:00.000Z"),
       is_deleted: false,
       comment_id: "comment-123",
     });

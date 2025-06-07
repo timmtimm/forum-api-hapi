@@ -7,10 +7,11 @@ const RepliesTableTestHelper = {
     content = "a reply",
     owner = "user-123",
     commentId = "comment-123",
+    date = "2023-01-01T00:00:00.000Z",
   }) {
     const query = {
-      text: "INSERT INTO replies VALUES($1, $2, $3, $4)",
-      values: [id, content, commentId, owner],
+      text: "INSERT INTO replies VALUES($1, $2, $3, $4, $5)",
+      values: [id, content, commentId, owner, date],
     };
     await pool.query(query);
   },

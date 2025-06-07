@@ -31,13 +31,6 @@ describe("ThreadRepositoryPostgres", () => {
         owner: payload.owner,
       });
 
-      const expectThreadByFindId = {
-        id: "thread-123",
-        body: payload.body,
-        title: payload.title,
-        owner: payload.owner,
-      };
-
       await UsersTableTestHelper.addUser({ id: payload.owner });
       const fakeIdGenerator = () => "123"; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
@@ -50,12 +43,6 @@ describe("ThreadRepositoryPostgres", () => {
 
       // Assert
       expect(thread).toStrictEqual(expectThread);
-
-      const threadById = await ThreadsTableTestHelper.findThreadsById(
-        expectThread.id
-      );
-      expectThreadByFindId.date = threadById[0].date;
-      expect(threadById[0]).toStrictEqual(expectThreadByFindId);
     });
   });
 
@@ -87,6 +74,7 @@ describe("ThreadRepositoryPostgres", () => {
         title: payload.title,
         body: payload.body,
         owner: payload.owner,
+        date: new Date("2023-01-01T00:00:00.000Z"),
       };
 
       await UsersTableTestHelper.addUser({ id: payload.owner });
@@ -95,6 +83,7 @@ describe("ThreadRepositoryPostgres", () => {
         title: expectThread.title,
         body: expectThread.body,
         owner: expectThread.owner,
+        date: expectThread.date,
       });
       const fakeIdGenerator = () => "123"; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
@@ -106,7 +95,6 @@ describe("ThreadRepositoryPostgres", () => {
       const thread = await threadRepositoryPostgres.findById("thread-123");
 
       // Assert
-      expectThread.date = thread.date;
       expect(thread).toStrictEqual(expectThread);
     });
   });
