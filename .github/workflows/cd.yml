@@ -18,6 +18,9 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
+          node -v
+          nvm use 22.6.0
+          node -v
           source ~/.nvm/nvm.sh
           cd ~/forum-api-hapi
           git pull origin main
